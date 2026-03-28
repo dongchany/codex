@@ -95,4 +95,50 @@ export OPENAI_API_KEY="your-local-secret"
 
 This repository intentionally avoids embedding gateway URLs or API keys in tracked files so the fork can remain public safely.
 
+## Running A Local Build
+
+If you build your own Codex binary locally, you do not need to reinstall from npm or Homebrew. You only need to make sure the shell resolves `codex` to the binary you want to run.
+
+Check which binary is currently active:
+
+```bash
+which codex
+readlink -f "$(which codex)"
+```
+
+If you want your locally built binary to be the default `codex`, copy it into a directory that is already on your `PATH`, such as `/usr/local/bin`:
+
+```bash
+sudo install -m 755 /path/to/codex /usr/local/bin/codex
+```
+
+If you prefer not to replace the global binary, you can also run it directly:
+
+```bash
+/path/to/codex --version
+/path/to/codex
+```
+
+Example local config with two permission profiles:
+
+```toml
+profile = "auto"
+
+[profiles.auto]
+approval_policy = "never"
+sandbox_mode = "danger-full-access"
+
+[profiles.safe]
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+```
+
+With that setup:
+
+- `codex` uses the default `auto` profile
+- `codex -p safe` switches back to confirmation prompts and sandboxed writes
+- `codex -a never -s danger-full-access` overrides permissions for a single run
+
+`danger-full-access` disables Codex's sandbox, but it does not bypass the operating system's privilege model. For true root operations, run Codex under `sudo`, or ensure your environment already allows passwordless or cached `sudo`.
+
 This repository is licensed under the [Apache-2.0 License](LICENSE).
