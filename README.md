@@ -57,4 +57,42 @@ You can also use Codex with an API key, but this requires [additional setup](htt
 - [**Installing & building**](./docs/install.md)
 - [**Open source fund**](./docs/open-source-fund.md)
 
+## Maintaining A Public Fork
+
+If you keep a public fork of Codex, use the upstream/origin split so it stays easy to sync with OpenAI's repository:
+
+```bash
+# One-time setup
+git remote rename origin upstream
+git remote add origin https://github.com/YOUR_GITHUB_USERNAME/codex.git
+
+# Sync with upstream later
+git fetch upstream
+git checkout main
+git merge upstream/main
+git push origin main
+```
+
+This keeps `upstream` pointed at `openai/codex` and `origin` pointed at your own repository.
+
+## Keeping Private Gateway Config Out Of Git
+
+If you use a private OpenAI-compatible gateway, keep the base URL and API key in local configuration instead of committing them to source control.
+
+Example local setup in `~/.codex/config.toml`:
+
+```toml
+model = "gpt-5.4"
+model_provider = "openai"
+openai_base_url = "http://gateway.example.com/v1"
+```
+
+Then provide the API key locally, for example:
+
+```bash
+export OPENAI_API_KEY="your-local-secret"
+```
+
+This repository intentionally avoids embedding gateway URLs or API keys in tracked files so the fork can remain public safely.
+
 This repository is licensed under the [Apache-2.0 License](LICENSE).
