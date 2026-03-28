@@ -130,6 +130,23 @@ pub struct ModelProviderInfo {
 }
 
 impl ModelProviderInfo {
+    fn normalized_base_url(&self) -> Option<String> {
+        self.base_url
+            .as_deref()
+            .map(|base_url| base_url.trim_end_matches('/').to_ascii_lowercase())
+    }
+
+    fn uses_official_openai_base_url(&self) -> bool {
+        match self.normalized_base_url() {
+            Some(base_url) => {
+                base_url == "https://api.openai.com/v1"
+                    || base_url == "https://api.openai.com"
+                    || base_url.starts_with("https://chatgpt.com/backend-api/codex")
+            }
+            None => self.is_openai(),
+        }
+    }
+
     fn build_header_map(&self) -> crate::error::Result<HeaderMap> {
         let capacity = self.http_headers.as_ref().map_or(0, HashMap::len)
             + self.env_http_headers.as_ref().map_or(0, HashMap::len);
@@ -276,6 +293,14 @@ impl ModelProviderInfo {
 
     pub fn is_openai(&self) -> bool {
         self.name == OPENAI_PROVIDER_NAME
+    }
+
+    pub fn supports_request_compression(&self) -> bool {
+        self.is_openai() && self.uses_official_openai_base_url()
+    }
+
+    pub fn supports_remote_model_refresh(&self) -> bool {
+        self.uses_official_openai_base_url()
     }
 }
 

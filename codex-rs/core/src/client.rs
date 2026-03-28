@@ -969,7 +969,7 @@ impl ModelClientSession {
     fn responses_request_compression(&self, auth: Option<&crate::auth::CodexAuth>) -> Compression {
         if self.client.state.enable_request_compression
             && auth.is_some_and(CodexAuth::is_chatgpt_auth)
-            && self.client.state.provider.is_openai()
+            && self.client.state.provider.supports_request_compression()
         {
             Compression::Zstd
         } else {

@@ -396,6 +396,10 @@ impl ModelsManager {
             return Ok(());
         }
 
+        if !self.provider.supports_remote_model_refresh() {
+            return Ok(());
+        }
+
         if self.auth_manager.auth_mode() != Some(AuthMode::Chatgpt) {
             if matches!(
                 refresh_strategy,

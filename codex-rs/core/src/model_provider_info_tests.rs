@@ -121,3 +121,51 @@ supports_websockets = true
     let provider: ModelProviderInfo = toml::from_str(provider_toml).unwrap();
     assert_eq!(provider.websocket_connect_timeout_ms, Some(15_000));
 }
+
+#[test]
+fn official_openai_endpoints_support_request_compression_and_remote_models() {
+    let provider = ModelProviderInfo {
+        name: "OpenAI".into(),
+        base_url: Some("https://api.openai.com/v1".into()),
+        env_key: None,
+        env_key_instructions: None,
+        experimental_bearer_token: None,
+        wire_api: WireApi::Responses,
+        query_params: None,
+        http_headers: None,
+        env_http_headers: None,
+        request_max_retries: None,
+        stream_max_retries: None,
+        stream_idle_timeout_ms: None,
+        websocket_connect_timeout_ms: None,
+        requires_openai_auth: false,
+        supports_websockets: false,
+    };
+
+    assert!(provider.supports_request_compression());
+    assert!(provider.supports_remote_model_refresh());
+}
+
+#[test]
+fn custom_openai_compatible_gateways_disable_request_compression_and_remote_models() {
+    let provider = ModelProviderInfo {
+        name: "OpenAI".into(),
+        base_url: Some("https://gateway.example.com/v1".into()),
+        env_key: None,
+        env_key_instructions: None,
+        experimental_bearer_token: None,
+        wire_api: WireApi::Responses,
+        query_params: None,
+        http_headers: None,
+        env_http_headers: None,
+        request_max_retries: None,
+        stream_max_retries: None,
+        stream_idle_timeout_ms: None,
+        websocket_connect_timeout_ms: None,
+        requires_openai_auth: false,
+        supports_websockets: false,
+    };
+
+    assert!(!provider.supports_request_compression());
+    assert!(!provider.supports_remote_model_refresh());
+}
